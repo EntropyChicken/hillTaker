@@ -120,7 +120,6 @@ function extendScape(mode){
   let newScore;
   callCount++;
 
-  mode = 1;
   switch(mode){
     case 0: // "uniform"
       newScore = random(-0.33,0.3);
