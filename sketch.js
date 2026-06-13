@@ -5,7 +5,8 @@ let midId;
 let c;
 let score = 0;
 let segmentScore = 0, isInSegment = 0, previousSegmentScore = 0;
-let mode = 15;
+let mode, modeQueue = [], modeTimer = 0;
+
 
 // for extendScape
 let blockTop = 0, blockBottom = 0, callCount = 0, modder = 1, modderBound = 1, freq1=1/3, freq2=1/4;
@@ -14,12 +15,13 @@ function setup() {
   createCanvas(windowWidth,windowHeight);
   gameWidth = min(width,height);
   gameHeight = gameWidth;
-  unit = ceil(0.0064*gameWidth);
+  unit = ceil(0.006*gameWidth);
   midId = floor(gameWidth/unit/2);
   c = {
     x:0,
     y:-gameHeight/2,
   };
+  getModeFromQueue();
 }
 
 function draw() {
@@ -27,14 +29,12 @@ function draw() {
   push();
   translate((width-gameWidth)/2,(height-gameHeight)/2);
 
-  if(random(0,150)<1){
-    mode = floor(random(0,22));
-    // one time high spike
-    // scape.push({
-    //   score:0.49,
-    //   hits:0,
-    // });
+  modeTimer--;
+  if(modeTimer<=0){
+    getModeFromQueue();
+    modeTimer = 500;
   }
+
   if(scape.length>0){
     scape.splice(0,1);
     c.x+=unit;
@@ -53,7 +53,7 @@ function draw() {
   push();
   scale(1,-1);
   translate(0,c.y);
-  fill(100,100,140);
+  fill(100,100,160);
   rect(0,-gameHeight/2,gameWidth,gameHeight);
   for(let i = 0; i<scape.length; i++){
     let x = i*unit, y = scape[i].score*gameHeight*0.95;
@@ -61,10 +61,10 @@ function draw() {
     noStroke();
     if(scape[i].hit){
       if(scape[i].score>=0){
-        fill(0,255,100,map(scape[i].score,0,0.5,30,255));
+        fill(0,255,100,map(scape[i].score,0,0.5,40,255));
       }
       else{
-        fill(200,0,0,map(scape[i].score,0,-0.5,20,255));
+        fill(200,0,0,map(scape[i].score,0,-0.5,40,255));
       }
       rect(x-unit/2,-gameHeight/2,unit,gameHeight);
     }
@@ -75,7 +75,7 @@ function draw() {
 
     if(i>0){
       let prevX = (i-1)*unit, prevY = scape[i-1].score*gameHeight*0.95;
-      strokeWeight(1);
+      strokeWeight(unit/4);
       stroke(0);
       line(x,y,prevX,prevY);
     }
@@ -260,6 +260,22 @@ function extendScape(mode){
     score:newScore,
     hit:0,
   });
+}
+function makeModeQueue(modeEnd=21){
+  modeQueue = [];
+  for(let i = 0; i<modeEnd; i++){
+    modeQueue.push(i);
+    let swap = modeQueue[i];
+    let j = floor(random(0,i));
+    modeQueue[i] = modeQueue[j];
+    modeQueue[j] = swap;
+  }
+}
+function getModeFromQueue(){
+  if(modeQueue.length===0){
+    makeModeQueue();
+  }
+  mode = modeQueue.pop();
 }
 
 function keyPressed(){
