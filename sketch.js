@@ -120,12 +120,13 @@ function extendScape(mode){
   let newScore;
   callCount++;
 
+  mode = 1;
   switch(mode){
     case 0: // "uniform"
       newScore = random(-0.33,0.3);
       break;
     case 1: // "upspikes"
-      newScore = -0.2+0.5*(microNoise>0.45);
+      newScore = -0.2+random(0,0.01)+0.5*(abs(microNoise)%0.5>0.38&&abs(microNoise)%0.5<0.45);
       break;
     case 2: // "downspikes"
       newScore = 0.01-0.5*(microNoise<-0.3);
