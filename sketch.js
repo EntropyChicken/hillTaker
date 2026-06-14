@@ -45,7 +45,7 @@ function draw() {
   modeTimer--;
   if (modeTimer <= 0) {
     getModeFromQueue();
-    modeTimer = 500;
+    modeTimer = 400;
   }
 
   if (scape.length > 0) {
@@ -269,10 +269,10 @@ function extendScape(mode) {
       newScore = sin(callCount / 40) * 0.02;
       break;
     case 22: // "sinesine"
-      newScore = sin(callCount / 10 + sin(callCount / 10)) * 0.2;
+      newScore = sin(callCount / 7 + sin(callCount / 7)) * 0.2;
       break;
     case 23: // "sinecosinesine"
-      newScore = sin(callCount / 20 + cos(callCount / 20 + sin(callCount / 20))) * 0.3;
+      newScore = sin(callCount / 7 + cos(callCount / 6 + sin(callCount / 5))) * 0.2;
       break;
     case 24: // "sinetimewarp"
       newScore = sin(callCount / 20 + sin(callCount / 20 * 3.7)) * 0.2;
@@ -434,7 +434,7 @@ function makeModeQueue(modeStart = 0, modeEnd = 22) {
 
 function getModeFromQueue() {
   if (modeQueue.length === 0) {
-    makeModeQueue(40, 41);
+    makeModeQueue(0, 41);
   }
   mode = modeQueue.pop();
 }
