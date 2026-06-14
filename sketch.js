@@ -5,7 +5,62 @@ let midId;
 let c;
 let score = 0;
 let segmentScore = 0, isInSegment = 0, previousSegmentScore = 0;
-let mode, modeQueue = [], modeTimer = 0;
+let mode, modeQueue = [], modeTimer = 0, modeCount = 41;
+
+let recorder = {
+  on: false,
+  stats:[
+		{score:11.511524194394486,frames:1200},
+		{score:9.324574547052775,frames:1200},
+		{score:8.67594612256646,frames:1200},
+		{score:11.947319120517408,frames:1600},
+		{score:3.5346775418597853,frames:1200},
+		{score:15.054411683800966,frames:1200},
+		{score:6.765219976756992,frames:1200},
+		{score:12.190054384699542,frames:1200},
+		{score:13.441699065360051,frames:1600},
+		{score:3.8836582617874864,frames:800},
+		{score:6.183968254890938,frames:1758},
+		{score:5.5405041626667515,frames:1600},
+		{score:2.4512043951882214,frames:1200},
+		{score:6.247754529569699,frames:1200},
+		{score:4.029414527019728,frames:1600},
+		{score:9.85650116732563,frames:850},
+		{score:29.669647025974577,frames:1600},
+		{score:23.547174735067948,frames:1200},
+		{score:12.429132311617016,frames:1200},
+		{score:7.817436045773023,frames:1200},
+		{score:8.60335643644771,frames:1200},
+		{score:4.92002521625956,frames:1200},
+		{score:41.17531192797345,frames:1200},
+		{score:53.42190736630993,frames:1200},
+		{score:66.07884649625508,frames:1200},
+		{score:38.5362777705223,frames:1200},
+		{score:29.74066396837101,frames:1200},
+		{score:46.63345459870396,frames:1200},
+		{score:25.893773188203085,frames:1200},
+		{score:37.318412397164316,frames:1200},
+		{score:50.83794734167044,frames:1200},
+		{score:36.023369893368034,frames:1200},
+		{score:42.39718987912194,frames:800},
+		{score:48.17010689685646,frames:1200},
+		{score:44.13750196319669,frames:1600},
+		{score:27.78302957433734,frames:1200},
+		{score:23.31512399073446,frames:1200},
+		{score:86.69118589113715,frames:1560},
+		{score:45.835670682304,frames:1200},
+		{score:2.633707308779406,frames:1200},
+		{score:40.20425369991879,frames:1200},
+	],
+  printStats:function(){
+    let s = "\tstats:[\n";
+    for(let i = 0; i<recorder.stats.length; i++){
+      s+="\t\t{score:"+recorder.stats[i].score+",frames:"+recorder.stats[i].frames+"},\n";
+    }
+    s+="\t],";
+    console.log(s);
+  }
+};
 
 // for extendScape
 let blockTop = 0, blockBottom = 0, callCount = 0, modder = 1, modderBound = 1, freq1=1/3, freq2=1/4, theta = 0, speed = 1, walker = 0, walker2 = 0, specialTimer = 0;
@@ -20,6 +75,15 @@ function setup() {
     y: -gameHeight / 2,
   };
   getModeFromQueue();
+
+  if(recorder.stats.length===0){
+    for(let i = 0; i<modeCount; i++){
+      recorder.stats.push({
+        score:0,
+        frames:0,
+      });
+    }
+  }
 
   // Force system resets across all desktop and mobile edge cases
   window.addEventListener('blur', forceResetSystemInputs);
@@ -65,6 +129,12 @@ function draw() {
     if (isInSegment === 1) {
       segmentScore += scape[midId].score;
     }
+    if(recorder.on){
+      recorder.stats[mode].score+=scape[midId].score;
+    }
+  }
+  if(recorder.on){
+    recorder.stats[mode].frames+=1;
   }
   
   push();
@@ -127,6 +197,12 @@ function draw() {
       fill(200, 0, 0);
     }
     text(previousSegmentScore.toFixed(3), 20, height - 20);
+  }
+
+  if(recorder.on){
+    fill(255,255,0,30);
+    noStroke();
+    ellipse(0,gameHeight/2,100,100);
   }
 }
 
@@ -421,7 +497,7 @@ function extendScape(mode) {
   });
 }
 
-function makeModeQueue(modeStart = 0, modeEnd = 22) {
+function makeModeQueue(modeStart = 0, modeEnd = modeCount) {
   modeQueue = [];
   for (let i = 0; i < modeEnd - modeStart; i++) {
     modeQueue.push(modeStart + i);
@@ -434,7 +510,7 @@ function makeModeQueue(modeStart = 0, modeEnd = 22) {
 
 function getModeFromQueue() {
   if (modeQueue.length === 0) {
-    makeModeQueue(0, 41);
+    makeModeQueue();
   }
   mode = modeQueue.pop();
 }
@@ -451,6 +527,12 @@ function resetSegmentScore() {
 function keyPressed() {
   if (key.toString() === "w") {
     isInSegment = 1;
+  }
+  if (key.toString() === "r") {
+    if(recorder.on){
+      recorder.printStats();
+    }
+    recorder.on = !recorder.on;
   }
 }
 
