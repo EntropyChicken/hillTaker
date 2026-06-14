@@ -9,7 +9,7 @@ let mode, modeQueue = [], modeTimer = 0;
 
 
 // for extendScape
-let blockTop = 0, blockBottom = 0, callCount = 0, modder = 1, modderBound = 1, freq1=1/3, freq2=1/4;
+let blockTop = 0, blockBottom = 0, callCount = 0, modder = 1, modderBound = 1, freq1=1/3, freq2=1/4, theta = 0, speed = 1, walker = 0, walker2 = 0, specialTimer = 0;
 
 function setup() {
   createCanvas(windowWidth,windowHeight);
@@ -245,11 +245,166 @@ function extendScape(mode){
     case 19: // "snipercircus"
       newScore = random(-200000,100000);
       break;
-    case 20: // "picnic"
-      newScore = sin(callCount/40)*0.022-0.005;
-      break;
-    case 21: // "gaussian"
+    case 20: // "gaussian"
       newScore = randomGaussian()*0.15-0.015;
+      break;
+    case 21: // "picnic"
+      newScore = sin(callCount/40)*0.02;
+      break;
+    case 22: // "sinesine"
+      newScore = sin(callCount/10+sin(callCount/10))*0.2;
+      // if(newScore<0){
+      //   newScore*=(1-7*newScore);
+      // }
+      break;
+    case 23: // "sinecosinesine"
+      newScore = sin(callCount/20+cos(callCount/20+sin(callCount/20)))*0.3;
+      break;
+    case 24: // "sinetimewarp"
+      newScore = sin(callCount/20+sin(callCount/20*3.7))*0.2;
+      break;
+    case 25: // "speedslide"
+      speed = 0.2+0.15*sin(callCount/60);
+      theta+=speed;
+      newScore = sin(theta)*speed;
+      break;
+    case 26: // "speedshift"
+      speed = 0.2+0.15*Math.sign(sin(callCount/60))*pow(abs(sin(callCount/60)),0.3);
+      theta+=speed;
+      newScore = sin(theta)*speed;
+      break;
+    case 27: // "speedswitch"
+      theta+=speed;
+      if(theta>2*PI){
+        theta-=2*PI;
+        speed = sq(random(0.4,1.8))*0.2;
+      }
+      newScore = sin(theta)*speed;
+      break;
+    case 28: // "speedup"
+      theta+=speed;
+      if(theta>2*PI){
+        theta-=2*PI;
+        speed*=1.15;
+        if(speed>=3){
+          speed = 0.06;
+        }
+      }
+      newScore = sin(theta)*speed;
+      break;
+    case 29: // "speedupfast"
+      theta+=speed;
+      if(theta>2*PI){
+        theta-=2*PI;
+        speed*=1.4;
+        if(speed>=10){
+          speed = 0.06;
+        }
+      }
+      newScore = sin(theta)*speed;
+      break;
+    case 30: // "cowboy"
+      newScore = sin(callCount*0.12)*0.12+sin(callCount*0.25+1)*0.12;
+      break;
+    case 31: // "cowboyslow"
+      newScore = sin(callCount*0.08)*0.1+sin(callCount*0.17+1)*0.1;
+      break;  
+    case 32: // "cowboytoofast"
+      newScore = sin(callCount*0.2)*0.22+sin(callCount*0.41+1)*0.22;
+      break;
+    case 33: // "walkerleash"
+      walker*=0.9;
+      walker+=random(-0.1,0.1);
+      newScore = walker;
+      break;
+    case 34: // "stepperleash"
+      walker*=0.6;
+      if(random(0,2)<1){
+        walker+=0.15;
+      }
+      else{
+        walker-=0.15;
+      }
+      newScore = walker;
+      break;
+    case 35: // "stepperlikeszero"
+      if(random(-0.3,0.3)>walker){
+        walker+=0.05;
+      }
+      else{
+        walker-=0.05;
+      }
+      newScore = walker;
+      break;
+    case 36: // "walkermoodswing"
+      walker*=0.6;
+      walker+=random(-1,1)*pow(1+sin(callCount/40),3)*0.06;
+      newScore = walker;
+      break;
+    case 37: // "walkerloop"  (HARD)
+      walker+=random(-0.1,0.1);
+      if(walker>0.5){
+        walker--;
+      }
+      if(walker<-0.5){
+        walker++;
+      }
+      newScore = walker;
+      break;
+    case 37: // "walkerfastloop"  (HARD)
+      walker+=random(-0.2,0.2);
+      if(walker>0.5){
+        walker--;
+      }
+      if(walker<-0.5){
+        walker++;
+      }
+      newScore = walker;
+      break;
+    case 38: // "walkerdownloop"
+      if(walker>0){
+        walker+=random(-0.06,0);
+      }
+      else{
+        walker+=random(-0.08,0.07);
+        if(walker<-0.5){
+          walker++;
+        }
+      }
+      newScore = walker;
+      break;
+    case 39: // "walkerlikesdistraction"
+      if(random(-0.45,-0.3)>walker){
+        walker+=0.05;
+      }
+      else{
+        walker-=0.05;
+      }
+      if(random(0,300)<1){
+        specialTimer = 8;
+      }
+      if(specialTimer>0){
+        specialTimer--;
+        newScore = 0.5;
+      }
+      else{
+        specialTimer = 0;
+        newScore = walker;
+      }
+      break;
+    case 40: // ataleoftwowalkers (probably make this hard?)
+      walker*=0.99;
+      walker+=random(-0.1,0.1);
+      walker = constrain(walker,0,0.5);
+      walker2*=0.99;
+      walker2+=random(-0.1,0.1);
+      walker2 = constrain(walker2,-0.5,0);
+      if(callCount%2){
+        newScore = walker;
+      }
+      else{
+        newScore = walker2;
+      }
       break;
     default:
       newScore = 0.05;
@@ -261,10 +416,10 @@ function extendScape(mode){
     hit:0,
   });
 }
-function makeModeQueue(modeEnd=21){
+function makeModeQueue(modeStart=0,modeEnd=22){
   modeQueue = [];
-  for(let i = 0; i<modeEnd; i++){
-    modeQueue.push(i);
+  for(let i = 0; i<modeEnd-modeStart; i++){
+    modeQueue.push(modeStart+i);
     let swap = modeQueue[i];
     let j = floor(random(0,i));
     modeQueue[i] = modeQueue[j];
@@ -273,7 +428,7 @@ function makeModeQueue(modeEnd=21){
 }
 function getModeFromQueue(){
   if(modeQueue.length===0){
-    makeModeQueue();
+    makeModeQueue(40,41);
   }
   mode = modeQueue.pop();
 }
